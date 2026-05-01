@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Distributor Manager Pro</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;font-size:14px}
+
+/* ── TYPOGRAPHY ── */
+h1{font-size:22px;font-weight:600}
+h2{font-size:17px;font-weight:600}
+h3{font-size:14px;font-weight:600}
+
+/* ── AUTH ── */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f5f5f3;padding:1rem}
+.auth-card{background:#fff;border:1px solid #e5e5e2;border-radius:14px;padding:2.5rem 2rem;width:400px;max-width:100%}
+.brand{font-size:18px;font-weight:700;margin-bottom:2px}
+.brand-sub{font-size:12px;color:#888;margin-bottom:2rem}
+.auth-tabs{display:flex;border:1px solid #e5e5e2;border-radius:8px;overflow:hidden;margin-bottom:1.5rem}
+.auth-tab{flex:1;padding:8px;font-size:13px;font-weight:500;text-align:center;cursor:pointer;background:#fff;color:#888;border:none;font-family:inherit}
+.auth-tab.active{background:#1a1a1a;color:#fff}
+.err-box{font-size:12px;color:#c0392b;padding:8px 10px;background:#fff5f5;border-radius:6px;margin-bottom:12px;display:none}
+.auth-switch{font-size:12px;color:#888;text-align:center;margin-top:1rem}
+.auth-switch a{color:#1a1a1a;cursor:pointer;font-weight:500;text-decoration:underline}
+.demo-section{margin-top:1.25rem;padding-top:1rem;border-top:1px solid #f0f0ee}
+.demo-label{font-size:11px;color:#aaa;margin-bottom:6px}
+.demo-btns{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ── LAYOUT ── */
+.app{display:none;flex-direction:column;min-height:100vh}
+.app.on{display:flex}
+.topbar{background:#fff;border-bottom:1px solid #e5e5e2;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:50}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.t-logo{font-size:15px;font-weight:700}
+.t-logo span{font-weight:400;color:#888}
+.role-tag{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
+.tag-admin{background:#eeedfe;color:#3c3489}
+.tag-dist{background:#e1f5ee;color:#085041}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.t-user{font-size:13px;color:#555}
+.notif-dot{position:relative;display:inline-block}
+.notif-dot::after{content:'';width:7px;height:7px;background:#e74c3c;border-radius:50%;position:absolute;top:-2px;right:-2px;display:none}
+.notif-dot.has-notif::after{display:block}
+
+.body-wrap{display:flex;flex:1}
+.sidebar{width:200px;background:#fff;border-right:1px solid #e5e5e2;padding:1rem 0;flex-shrink:0;overflow-y:auto}
+.sb-section{font-size:10px;color:#aaa;padding:10px 1.25rem 4px;text-transform:uppercase;letter-spacing:0.5px}
+.sb-item{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:9px 1.25rem;font-size:13px;color:#555;border:none;background:transparent;cursor:pointer;border-left:3px solid transparent;font-family:inherit;transition:background 0.1s}
+.sb-item:hover{background:#f5f5f3;color:#1a1a1a}
+.sb-item.active{background:#f0f0ee;color:#1a1a1a;font-weight:500;border-left-color:#1a1a1a}
+.sb-icon{font-size:14px;width:16px;text-align:center}
+.sb-divider{height:1px;background:#f0f0ee;margin:6px 0}
+
+.main{flex:1;padding:2rem;overflow-y:auto;max-width:960px}
+.page{display:none}
+.page.active{display:block}
+.page-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+.page-title{font-size:18px;font-weight:600}
+.page-sub{font-size:13px;color:#888;margin-top:2px}
+
+/* ── COMPONENTS ── */
+.btn{font-size:13px;padding:8px 16px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;color:#1a1a1a;font-family:inherit;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:#f5f5f3}
+.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.btn-primary:hover{background:#333}
+.btn-success{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.btn-success:hover{background:#0F6E56}
+.btn-danger{background:#fff;color:#c0392b;border-color:#f5c6c6}
+.btn-danger:hover{background:#fff5f5}
+.btn-sm{font-size:11px;padding:4px 10px}
+.btn-full{width:100%;justify-content:center;padding:10px}
+.btn-outline{background:transparent}
+
+.card{background:#fff;border:1px solid #e5e5e2;border-radius:10px;padding:1.25rem;margin-bottom:1.25rem}
+.card-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.card-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:#888}
+
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.5rem}
+.metric{background:#fff;border:1px solid #e5e5e2;border-radius:10px;padding:1rem 1.1rem}
+.m-label{font-size:11px;color:#888;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.4px}
+.m-val{font-size:22px;font-weight:600}
+.m-sub{font-size:11px;color:#aaa;margin-top:2px}
+
+table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+th{text-align:left;font-size:11px;color:#888;padding:8px 10px;border-bottom:1px solid #e5e5e2;text-transform:uppercase;letter-spacing:0.4px;font-weight:500}
+td{padding:10px;border-bottom:1px solid #f0f0ee;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafaf9}
+
+.badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500}
+.b-green{background:#e1f5ee;color:#085041}
+.b-blue{background:#e6f1fb;color:#0c447c}
+.b-amber{background:#faeeda;color:#633806}
+.b-red{background:#fce8e8;color:#7a1e1e}
+.b-gray{background:#f0f0ee;color:#555}
+.b-purple{background:#eeedfe;color:#3c3489}
+
+.av{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;background:#e6f1fb;color:#0c447c;flex-shrink:0}
+.av-lg{width:52px;height:52px;font-size:16px}
+.row-flex{display:flex;align-items:center;gap:8px}
+
+.progress-bar{height:6px;background:#f0f0ee;border-radius:4px;overflow:hidden;margin-top:4px}
+.progress-fill{height:100%;border-radius:4px;background:#1D9E75;transition:width 0.3s}
+
+/* ── FORMS ── */
+.fg{margin-bottom:14px}
+.fg label{font-size:12px;color:#555;font-weight:500;display:block;margin-bottom:5px}
+input[type=text],input[type=email],input[type=password],input[type=number],input[type=date],select,textarea{width:100%;font-size:13px;padding:9px 11px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#1a1a1a;font-family:inherit}
+textarea{resize:vertical;min-height:80px}
+input:focus,select:focus,textarea:focus{outline:2px solid #1a1a1a;outline-offset:1px;border-color:transparent}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* ── MODAL ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;align-items:center;justify-content:center;padding:1rem}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:14px;padding:1.75rem;width:500px;max-width:100%;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:1.25rem}
+.modal-actions{display:flex;gap:8px;margin-top:1.25rem;padding-top:1rem;border-top:1px solid #f0f0ee}
+
+/* ── ALERTS ── */
+.alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:1rem}
+.alert-info{background:#e6f1fb;color:#0c447c}
+.alert-success{background:#e1f5ee;color:#085041}
+.alert-warning{background:#faeeda;color:#633806}
+.alert-danger{background:#fce8e8;color:#7a1e1e}
+
+/* ── HERO ── */
+.hero{background:#1a1a1a;color:#fff;border-radius:12px;padding:1.5rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem}
+.hero-av{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;flex-shrink:0}
+.hero-info{flex:1}
+.hero-name{font-size:18px;font-weight:600}
+.hero-sub{font-size:13px;color:#aaa;margin-top:2px}
+.hero-tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.hero-tag{font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,0.15);color:#fff}
+
+/* ── STEP TRACKER ── */
+.steps{display:flex;gap:0;margin-bottom:1.5rem;background:#fff;border:1px solid #e5e5e2;border-radius:10px;overflow:hidden}
+.step{flex:1;padding:10px 6px;text-align:center;font-size:11px;color:#888;border-right:1px solid #e5e5e2;position:relative}
+.step:last-child{border-right:none}
+.step.done{background:#e1f5ee;color:#085041}
+.step.current{background:#1a1a1a;color:#fff;font-weight:500}
+.step-num{font-size:14px;font-weight:600;display:block;margin-bottom:2px}
+
+/* ── COURSE ── */
+.course-card{background:#fff;border:1px solid #e5e5e2;border-radius:10px;padding:1.25rem;margin-bottom:1rem}
+.course-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.course-title{font-size:14px;font-weight:600}
+.course-meta{font-size:12px;color:#888;margin-top:3px}
+.lesson-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #f5f5f3;font-size:13px}
+.lesson-check{width:18px;height:18px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer}
+.lesson-check.done{background:#1D9E75;border-color:#1D9E75;color:#fff}
+
+/* ── NOTIFICATION ── */
+.notif-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0ee}
+.notif-item:last-child{border-bottom:none}
+.notif-dot-indicator{width:8px;height:8px;border-radius:50%;background:#378ADD;margin-top:4px;flex-shrink:0}
+.notif-dot-indicator.read{background:#ddd}
+.notif-content{flex:1}
+.notif-msg{font-size:13px;margin-bottom:2px}
+.notif-time{font-size:11px;color:#aaa}
+
+/* ── CONTRACT ── */
+.contract-box{border:2px dashed #e5e5e2;border-radius:10px;padding:1.5rem;margin-bottom:1.25rem;font-size:13px;color:#555;line-height:1.7}
+.sig-area{border:1px solid #ddd;border-radius:8px;height:80px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:13px;cursor:pointer;margin-top:8px;background:#fafaf9}
+.sig-area.signed{border-color:#1D9E75;color:#085041;background:#e1f5ee;font-weight:500}
+
+/* ── PAYMENT ── */
+.payment-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f0f0ee;font-size:13px}
+.payment-row:last-child{border-bottom:none}
+.payment-amt{font-weight:600;font-size:14px}
+.payment-amt.positive{color:#085041}
+.payment-amt.negative{color:#c0392b}
+
+/* ── DOCUMENT ── */
+.doc-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0ee}
+.doc-row:last-child{border-bottom:none}
+.doc-icon{width:32px;height:32px;background:#f0f0ee;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.doc-info{flex:1}
+.doc-name{font-size:13px;font-weight:500}
+.doc-meta{font-size:11px;color:#aaa;margin-top:1px}
+
+/* ── STOCK ── */
+.stock-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0ee}
+.stock-item:last-child{border-bottom:none}
+.stock-img{width:40px;height:40px;background:#f0f0ee;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.stock-info{flex:1}
+.stock-name{font-size:13px;font-weight:500}
+.stock-price{font-size:12px;color:#888;margin-top:1px}
+.qty-ctrl{display:flex;align-items:center;gap:6px}
+.qty-btn{width:24px;height:24px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.qty-val{font-size:13px;font-weight:500;min-width:24px;text-align:center}
+
+/* ── APPLY PUBLIC PAGE ── */
+.apply-wrap{min-height:100vh;background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);display:flex;align-items:center;justify-content:center;padding:2rem}
+.apply-card{background:#fff;border-radius:16px;padding:2.5rem;width:560px;max-width:100%}
+.apply-logo{font-size:20px;font-weight:700;margin-bottom:4px}
+.apply-sub{font-size:13px;color:#888;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid #f0f0ee}
+
+/* ── ACTIVITY LOG ── */
+.activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0ee;font-size:13px}
+.activity-item:last-child{border-bottom:none}
+.act-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;background:#f0f0ee}
+.act-content{flex:1}
+.act-time{font-size:11px;color:#aaa;margin-top:2px}
+
+/* ── ADMIN NOTES ── */
+.note-item{background:#fafaf9;border-radius:8px;padding:10px 12px;margin-bottom:8px;border-left:3px solid #1a1a1a}
+.note-text{font-size:13px;margin-bottom:4px}
+.note-meta{font-size:11px;color:#aaa}
+
+/* ── MISC ── */
+.empty{text-align:center;padding:2.5rem;color:#aaa;font-size:13px}
+.top-action{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+.divider{height:1px;background:#f0f0ee;margin:1rem 0}
+.text-muted{color:#888;font-size:13px}
+.chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:#f0f0ee;color:#555;margin:2px}
+
+@media(max-width:700px){
+  .sidebar{display:none}
+  .form-row,.form-row-3{grid-template-columns:1fr}
+  .main{padding:1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     PUBLIC: APPLY PAGE
+════════════════════════════════════════════ -->
+<div id="apply-screen" style="display:none">
+  <div class="apply-wrap">
+    <div class="apply-card">
+      <div class="apply-logo">Distributor Manager Pro</div>
+      <div class="apply-sub">Medical supplement network — distributor application</div>
+      <div id="apply-success" class="alert alert-success" style="display:none">
+        Application submitted! We'll review it and contact you within 48 hours.
+        <br><br><button class="btn btn-primary" onclick="showScreen('auth')">Sign in to your account</button>
+      </div>
+      <div id="apply-form-wrap">
+        <div class="form-row">
+          <div class="fg"><label>First name</label><input type="text" id="ap-fname" placeholder="Jane"></div>
+          <div class="fg"><label>Last name</label><input type="text" id="ap-lname" placeholder="Smith"></div>
+        </div>
+        <div class="fg"><label>Email address</label><input type="email" id="ap-email" placeholder="jane@email.com"></div>
+        <div class="form-row">
+          <div class="fg"><label>Phone</label><input type="text" id="ap-phone" placeholder="+1 555 000 000"></div>
+          <div class="fg"><label>City / Region</label><input type="text" id="ap-city" placeholder="New York, NY"></div>
+        </div>
+        <div class="fg"><label>Why do you want to become a distributor?</label><textarea id="ap-why" placeholder="Tell us about your motivation and experience..."></textarea></div>
+        <div class="fg"><label>Previous sales / network marketing experience</label><textarea id="ap-exp" placeholder="Describe any relevant experience..."></textarea></div>
+        <div class="form-row">
+          <div class="fg"><label>Referred by (optional)</label><input type="text" id="ap-ref" placeholder="Sponsor name or ID"></div>
+          <div class="fg"><label>Target monthly sales ($)</label><input type="number" id="ap-target" placeholder="2000"></div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="submitApplication()">Submit application</button>
+        <div style="text-align:center;margin-top:1rem;font-size:12px;color:#888">Already have an account? <a style="color:#1a1a1a;cursor:pointer;font-weight:500" onclick="showScreen('auth')">Sign in</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     AUTH SCREEN
+════════════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="brand">Distributor Manager Pro</div>
+      <div class="brand-sub">Medical supplement network management</div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="at-login" onclick="switchAuth('login')">Sign in</button>
+        <button class="auth-tab" id="at-reg" onclick="switchAuth('register')">Register</button>
+      </div>
+
+      <div id="auth-login">
+        <div id="login-err" class="err-box"></div>
+        <div class="fg"><label>Email</label><input type="email" id="li-email" placeholder="you@email.com"></div>
+        <div class="fg"><label>Password</label><input type="password" id="li-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <button class="btn btn-primary btn-full" onclick="doLogin()">Sign in</button>
+        <div class="auth-switch">New distributor? <a onclick="showScreen('apply')">Apply here</a></div>
+        <div class="demo-section">
+          <div class="demo-label">Demo accounts</div>
+          <div class="demo-btns">
+            <button class="btn btn-sm" onclick="ql('admin@mapa.com','admin123')">Admin</button>
+            <button class="btn btn-sm" onclick="ql('maria@email.com','dist123')">Distributor — Maria</button>
+            <button class="btn btn-sm" onclick="ql('james@email.com','dist123')">Distributor — James</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="auth-register" style="display:none">
+        <div id="reg-err" class="err-box"></div>
+        <div class="alert alert-info">New accounts are created as distributor. Admins can manage roles.</div>
+        <div class="form-row">
+          <div class="fg"><label>First name</label><input type="text" id="rg-fname" placeholder="Jane"></div>
+          <div class="fg"><label>Last name</label><input type="text" id="rg-lname" placeholder="Smith"></div>
+        </div>
+        <div class="fg"><label>Email</label><input type="email" id="rg-email" placeholder="you@email.com"></div>
+        <div class="fg"><label>Password</label><input type="password" id="rg-pass" placeholder="min. 6 characters"></div>
+        <button class="btn btn-primary btn-full" onclick="doRegister()">Create account</button>
+        <div class="auth-switch">Already registered? <a onclick="switchAuth('login')">Sign in</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MAIN APP
+════════════════════════════════════════════ -->
+<div class="app" id="main-app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="t-logo">Distributor Manager <span>Pro</span></div>
+      <span class="role-tag" id="role-tag"></span>
+    </div>
+    <div class="topbar-right">
+      <div class="notif-dot" id="notif-bell" onclick="navTo('notifications')" style="cursor:pointer;font-size:18px">🔔</div>
+      <span class="t-user" id="tb-user"></span>
+      <button class="btn btn-sm" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="body-wrap">
+    <!-- ADMIN SIDEBAR -->
+    <nav class="sidebar" id="sb-admin" style="display:none">
+      <div class="sb-section">Overview</div>
+      <button class="sb-item active" onclick="navTo('a-dashboard')"><span class="sb-icon">📊</span>Dashboard</button>
+      <div class="sb-divider"></div>
+      <div class="sb-section">Management</div>
+      <button class="sb-item" onclick="navTo('a-applications')"><span class="sb-icon">📋</span>Applications</button>
+      <button class="sb-item" onclick="navTo('a-distributors')"><span class="sb-icon">👥</span>Distributors</button>
+      <button class="sb-item" onclick="navTo('a-contracts')"><span class="sb-icon">📝</span>Contracts</button>
+      <button class="sb-item" onclick="navTo('a-courses')"><span class="sb-icon">🎓</span>Courses</button>
+      <button class="sb-item" onclick="navTo('a-payments')"><span class="sb-icon">💰</span>Payments</button>
+      <button class="sb-item" onclick="navTo('a-stock')"><span class="sb-icon">📦</span>Stock orders</button>
+      <div class="sb-divider"></div>
+      <div class="sb-section">System</div>
+      <button class="sb-item" onclick="navTo('a-users')"><span class="sb-icon">🔑</span>Users & roles</button>
+      <button class="sb-item" onclick="navTo('notifications')"><span class="sb-icon">🔔</span>Notifications</button>
+    </nav>
+
+    <!-- DISTRIBUTOR SIDEBAR -->
+    <nav class="sidebar" id="sb-dist" style="display:none">
+      <div class="sb-section">My portal</div>
+      <button class="sb-item active" onclick="navTo('d-dashboard')"><span class="sb-icon">📊</span>Dashboard</button>
+      <button class="sb-item" onclick="navTo('d-application')"><span class="sb-icon">📋</span>My application</button>
+      <button class="sb-item" onclick="navTo('d-contract')"><span class="sb-icon">📝</span>My contract</button>
+      <button class="sb-item" onclick="navTo('d-courses')"><span class="sb-icon">🎓</span>Training</button>
+      <button class="sb-item" onclick="navTo('d-documents')"><span class="sb-icon">📁</span>Documents</button>
+      <button class="sb-item" onclick="navTo('d-payments')"><span class="sb-icon">💰</span>Payments</button>
+      <button class="sb-item" onclick="navTo('d-stock')"><span class="sb-icon">📦</span>Stock order</button>
+      <button class="sb-item" onclick="navTo('d-profile')"><span class="sb-icon">👤</span>My profile</button>
+      <button class="sb-item" onclick="navTo('notifications')"><span class="sb-icon">🔔</span>Notifications</button>
+    </nav>
+
+    <main class="main">
+
+      <!-- ── ADMIN: DASHBOARD ── -->
+      <div id="p-a-dashboard" class="page active">
+        <!-- Hero banner -->
+        <div style="background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 60%,#1D9E75 100%);border-radius:14px;padding:1.75rem 2rem;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
+          <div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Distributor Manager Pro</div>
+            <div style="font-size:22px;font-weight:700;color:#fff" id="adm-greeting">Good morning 👋</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-top:4px">Here's your network at a glance</div>
+          </div>
+          <button class="btn" style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.2);color:#fff" onclick="openModal('m-notif-send')">📢 Send notification</button>
+        </div>
+
+        <!-- KPI Cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:1.5rem">
+          <div style="background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e5e5e2;position:relative;overflow:hidden">
+            <div style="position:absolute;top:0;right:0;width:60px;height:60px;background:#e1f5ee;border-radius:0 12px 0 60px;display:flex;align-items:flex-start;justify-content:flex-end;padding:8px;font-size:18px">👥</div>
+            <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Active distributors</div>
+            <div style="font-size:28px;font-weight:700;color:#1a1a1a" id="adm-active">0</div>
+            <div style="font-size:11px;color:#1D9E75;margin-top:4px">▲ network growing</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e5e5e2;position:relative;overflow:hidden">
+            <div style="position:absolute;top:0;right:0;width:60px;height:60px;background:#faeeda;border-radius:0 12px 0 60px;display:flex;align-items:flex-start;justify-content:flex-end;padding:8px;font-size:18px">📋</div>
+            <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Pending applications</div>
+            <div style="font-size:28px;font-weight:700;color:#1a1a1a" id="adm-apps">0</div>
+            <div style="font-size:11px;color:#BA7517;margin-top:4px">▲ needs review</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e5e5e2;position:relative;overflow:hidden">
+            <div style="position:absolute;top:0;right:0;width:60px;height:60px;background:#e6f1fb;border-radius:0 12px 0 60px;display:flex;align-items:flex-start;justify-content:flex-end;padding:8px;font-size:18px">💰</div>
+            <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Total revenue</div>
+            <div style="font-size:28px;font-weight:700;color:#1a1a1a" id="adm-rev">$0</div>
+            <div style="font-size:11px;color:#185FA5;margin-top:4px">▲ paid commissions</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e5e5e2;position:relative;overflow:hidden">
+            <div style="position:absolute;top:0;right:0;width:60px;height:60px;background:#eeedfe;border-radius:0 12px 0 60px;display:flex;align-items:flex-start;justify-content:flex-end;padding:8px;font-size:18px">⏳</div>
+            <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Commissions due</div>
+            <div style="font-size:28px;font-weight:700;color:#1a1a1a" id="adm-comm">$0</div>
+            <div style="font-size:11px;color:#534AB7;margin-top:4px">▲ awaiting payout</div>
+          </div>
+        </div>
+
+        <!-- Charts row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+          <!-- Sales trend chart -->
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">Sales trend — last 6 months</div></div>
+            <canvas id="chart-sales" height="160"></canvas>
+          </div>
+          <!-- Commission breakdown donut -->
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">Commission breakdown</div></div>
+            <div style="display:flex;align-items:center;gap:1rem">
+              <canvas id="chart-donut" width="140" height="140"></canvas>
+              <div id="donut-legend" style="flex:1;font-size:12px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top performers + Network tree -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">Top performers</div></div>
+            <div id="a-top-performers"></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">Recent applications</div><button class="btn btn-sm" onclick="navTo('a-applications')">View all</button></div>
+            <div id="a-recent-apps"></div>
+          </div>
+        </div>
+
+        <!-- Network tree visualization -->
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Network tree</div><span style="font-size:11px;color:#aaa">Sponsor relationships</span></div>
+          <div id="network-tree" style="overflow-x:auto;padding-bottom:8px"></div>
+        </div>
+
+        <!-- Activity log -->
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Activity log</div></div>
+          <div id="a-activity-log"></div>
+        </div>
+      </div>
+
+      <!-- ── ADMIN: APPLICATIONS ── -->
+      <div id="p-a-applications" class="page">
+        <div class="page-hdr">
+          <div><div class="page-title">Applications</div><div class="page-sub">Review and process distributor applications</div></div>
+        </div>
+        <div class="card" style="padding:0">
+          <table>
+            <thead><tr>
+              <th style="width:22%">Applicant</th><th style="width:20%">Email</th>
+              <th style="width:14%">City</th><th style="width:14%">Status</th>
+              <th style="width:16%">Applied</th><th style="width:14%">Actions</th>
+            </tr></thead>
+            <tbody id="apps-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── ADMIN: DISTRIBUTORS ── -->
+      <div id="p-a-distributors" class="page">
+        <div class="page-hdr">
+          <div><div class="page-title">Distributors</div><div class="page-sub">Manage your distributor network</div></div>
+          <button class="btn btn-primary" onclick="openModal('m-add-dist')">+ Add distributor</button>
+        </div>
+        <div class="card" style="padding:0">
+          <table>
+            <thead><tr>
+              <th style="width:24%">Name</th><th style="width:16%">Level</th>
+              <th style="width:16%">Sales</th><th style="width:14%">Status</th>
+              <th style="width:16%">Sponsor</th><th style="width:14%">Action</th>
+            </tr></thead>
+            <tbody id="admin-dist-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── ADMIN: CONTRACTS ── -->
+      <div id="p-a-contracts" class="page">
+        <div class="page-hdr">
+          <div><div class="page-title">Contracts</div><div class="page-sub">Manage distributor agreements</div></div>
+          <button class="btn btn-primary" onclick="openModal('m-send-contract')">Send contract</button>
+        </div>
+        <div class="card" style="padding:0">
+          <table>
+            <thead><tr>
+              <th style="width:26%">Distributor</th><th style="width:22%">Type</th>
+              <th style="width:16%">Status</th><th style="width:18%">Sent date</th><th style="width:18%">Signed date</th>
+            </tr></thead>
+            <tbody id="admin-contracts-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── ADMIN: COURSES ── -->
+      <div id="p-a-courses" class="page">
+        <div class="page-hdr">
+          <div><div class="page-title">Training courses</div><div class="page-sub">Manage training content for distributors</div></div>
+          <button class="btn btn-primary" onclick="openModal('m-add-course')">+ Add course</button>
+        </div>
+        <div id="admin-courses-list"></div>
+      </div>
+
+      <!-- ── ADMIN: PAYMENTS ── -->
+      <div id="p-a-payments" class="page">
+        <div class="page-hdr">
+          <div><div class="page-title">Payments</div><div class="page-sub">Commission payouts and payment history</div></div>
+          <button class="btn btn-primary" onclick="openModal('m-add-payment')">Record payment</button>
+        </div>
+        <div class="card" style="padding:0">
+          <table>
+            <thead><tr>
+              <th style="width:22%">Distributor</th><th style="width:20%">Type</th>
+              <th style="width:16%">Amount</th><th style="width:16%">Status</th>
+              <th style="width:16%">Date</th><th style="width:10%">Action</th>
+            </tr></thead>
+            <tbody id="admin-payments-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── ADMIN: STOCK ── -->
+      <div id="p-a-stock" class="page">
+        <div class="page-hdr">
+          <div><div class="page-title">Stock orders</div><div class="page-sub">All distributor stock orders</div></div>
+        </div>
+        <div class="card" style="padding:0">
+          <table>
+            <thead><tr>
+              <th style="width:24%">Distributor</th><th style="width:22%">Products</th>
+              <th style="width:14%">Total</th><th style="width:16%">Status</th>
+              <th style="width:14%">Date</th><th style="width:10%">Action</th>
+            </tr></thead>
+            <tbody id="admin-stock-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── ADMIN: USERS ── -->
+      <div id="p-a-users" class="page">
+        <div class="page-hdr"><div class="page-title">Users & roles</div></div>
+        <div class="alert alert-info">Admins have full access. Distributors see only their own data.</div>
+        <div class="card" style="padding:0">
+          <table>
+            <thead><tr>
+              <th style="width:28%">Name</th><th style="width:30%">Email</th>
+              <th style="width:16%">Role</th><th style="width:26%">Action</th>
+            </tr></thead>
+            <tbody id="users-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── DIST: DASHBOARD ── -->
+      <div id="p-d-dashboard" class="page">
+        <!-- Hero -->
+        <div id="d-hero" class="hero" style="background:linear-gradient(135deg,#1a1a1a 0%,#1D9E75 100%)"></div>
+
+        <!-- Onboarding progress -->
+        <div class="steps" id="onboard-steps" style="margin-bottom:1.5rem"></div>
+
+        <!-- KPI cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem">
+          <div style="background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e5e5e2;position:relative;overflow:hidden">
+            <div style="position:absolute;top:0;right:0;width:50px;height:50px;background:#e1f5ee;border-radius:0 12px 0 50px;display:flex;align-items:flex-start;justify-content:flex-end;padding:6px;font-size:16px">💵</div>
+            <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">My sales</div>
+            <div style="font-size:24px;font-weight:700" id="d-sales">$0</div>
+            <div style="font-size:11px;color:#1D9E75;margin-top:3px">total</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e5e5e2;position:relative;overflow:hidden">
+            <div style="position:absolute;top:0;right:0;width:50px;height:50px;background:#eeedfe;border-radius:0 12px 0 50px;display:flex;align-items:flex-start;justify-content:flex-end;padding:6px;font-size:16px">🏆</div>
+            <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Commission</div>
+            <div style="font-size:24px;font-weight:700" id="d-comm">$0</div>
+            <div style="font-size:11px;color:#534AB7;margin-top:3px">earned</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e5e5e2;position:relative;overflow:hidden">
+            <div style="position:absolute;top:0;right:0;width:50px;height:50px;background:#e6f1fb;border-radius:0 12px 0 50px;display:flex;align-items:flex-start;justify-content:flex-end;padding:6px;font-size:16px">📦</div>
+            <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Orders</div>
+            <div style="font-size:24px;font-weight:700" id="d-orders">0</div>
+            <div style="font-size:11px;color:#185FA5;margin-top:3px">placed</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e5e5e2;position:relative;overflow:hidden">
+            <div style="position:absolute;top:0;right:0;width:50px;height:50px;background:#faeeda;border-radius:0 12px 0 50px;display:flex;align-items:flex-start;justify-content:flex-end;padding:6px;font-size:16px">🎓</div>
+            <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Training</div>
+            <div style="font-size:24px;font-weight:700" id="d-courses">0</div>
+            <div style="font-size:11px;color:#BA7517;margin-top:3px">courses done</div>
+          </div>
+        </div>
+
+        <!-- Charts row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">My sales history</div></div>
+            <canvas id="chart-my-sales" height="160"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">Commission rate breakdown</div></div>
+            <canvas id="chart-my-comm" height="160"></canvas>
+          </div>
+        </div>
+
+        <!-- Payments + Courses -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">Recent payments</div><button class="btn btn-sm" onclick="navTo('d-payments')">View all</button></div>
+            <div id="d-recent-payments"></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">My courses</div><button class="btn btn-sm" onclick="navTo('d-courses')">View all</button></div>
+            <div id="d-course-preview"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DIST: APPLICATION ── -->
+      <div id="p-d-application" class="page">
+        <div class="page-hdr"><div><div class="page-title">My application</div><div class="page-sub">Application status and details</div></div></div>
+        <div id="d-application-view"></div>
+      </div>
+
+      <!-- ── DIST: CONTRACT ── -->
+      <div id="p-d-contract" class="page">
+        <div class="page-hdr"><div><div class="page-title">My contract</div><div class="page-sub">Distributor agreement</div></div></div>
+        <div id="d-contract-view"></div>
+      </div>
+
+      <!-- ── DIST: COURSES ── -->
+      <div id="p-d-courses" class="page">
+        <div class="page-hdr"><div><div class="page-title">Training</div><div class="page-sub">Complete your training to become an active distributor</div></div></div>
+        <div id="d-courses-list"></div>
+      </div>
+
+      <!-- ── DIST: DOCUMENTS ── -->
+      <div id="p-d-documents" class="page">
+        <div class="page-hdr">
+          <div><div class="page-title">Documents</div><div class="page-sub">Upload and manage your documents</div></div>
+          <button class="btn btn-primary" onclick="openModal('m-upload-doc')">Upload document</button>
+        </div>
+        <div class="card"><div id="d-docs-list"></div></div>
+      </div>
+
+      <!-- ── DIST: PAYMENTS ── -->
+      <div id="p-d-payments" class="page">
+        <div class="page-hdr"><div><div class="page-title">Payments</div><div class="page-sub">Your commission history</div></div></div>
+        <div class="metrics">
+          <div class="metric"><div class="m-label">Total earned</div><div class="m-val" id="dp-total">$0</div></div>
+          <div class="metric"><div class="m-label">Pending</div><div class="m-val" id="dp-pending">$0</div></div>
+          <div class="metric"><div class="m-label">This month</div><div class="m-val" id="dp-month">$0</div></div>
+        </div>
+        <div class="card"><div id="d-payments-list"></div></div>
+      </div>
+
+      <!-- ── DIST: STOCK ── -->
+      <div id="p-d-stock" class="page">
+        <div class="page-hdr"><div><div class="page-title">Order stock</div><div class="page-sub">Select products to order</div></div></div>
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:1.25rem">
+          <div class="card"><div id="product-catalog"></div></div>
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">My cart</div></div>
+            <div id="cart-items"></div>
+            <div class="divider"></div>
+            <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:1rem">
+              <span>Total</span><span id="cart-total">$0</span>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="submitStockOrder()">Submit order</button>
+            <div id="order-history-mini" style="margin-top:1.25rem">
+              <div class="card-title" style="margin-bottom:8px">My orders</div>
+              <div id="my-stock-orders"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DIST: PROFILE ── -->
+      <div id="p-d-profile" class="page">
+        <div class="page-hdr"><div><div class="page-title">My profile</div></div><button class="btn btn-primary" onclick="saveProfile()">Save changes</button></div>
+        <div class="card">
+          <div class="form-row">
+            <div class="fg"><label>First name</label><input type="text" id="pf-fname"></div>
+            <div class="fg"><label>Last name</label><input type="text" id="pf-lname"></div>
+          </div>
+          <div class="fg"><label>Email</label><input type="email" id="pf-email"></div>
+          <div class="form-row">
+            <div class="fg"><label>Phone</label><input type="text" id="pf-phone"></div>
+            <div class="fg"><label>City</label><input type="text" id="pf-city"></div>
+          </div>
+          <div class="fg"><label>Bio / notes</label><textarea id="pf-bio"></textarea></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:1rem">Change password</div>
+          <div class="form-row">
+            <div class="fg"><label>New password</label><input type="password" id="pf-newpass" placeholder="min. 6 characters"></div>
+            <div class="fg"><label>Confirm password</label><input type="password" id="pf-confpass" placeholder="repeat password"></div>
+          </div>
+          <button class="btn btn-primary" onclick="changePassword()">Update password</button>
+        </div>
+      </div>
+
+      <!-- ── NOTIFICATIONS ── -->
+      <div id="p-notifications" class="page">
+        <div class="page-hdr">
+          <div><div class="page-title">Notifications</div></div>
+          <button class="btn btn-sm" onclick="markAllRead()">Mark all read</button>
+        </div>
+        <div class="card"><div id="notif-list"></div></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODALS
+════════════════════════════════════════════ -->
+
+<!-- Add distributor -->
+<div class="modal-bg" id="m-add-dist" onclick="if(event.target===this)closeModal('m-add-dist')">
+  <div class="modal">
+    <div class="modal-title">Add distributor</div>
+    <div class="form-row">
+      <div class="fg"><label>First name</label><input type="text" id="ad-fname" placeholder="Jane"></div>
+      <div class="fg"><label>Last name</label><input type="text" id="ad-lname" placeholder="Smith"></div>
+    </div>
+    <div class="fg"><label>Email</label><input type="email" id="ad-email"></div>
+    <div class="form-row">
+      <div class="fg"><label>Level</label><select id="ad-level"><option>Level 1</option><option>Level 2</option><option>Level 3</option></select></div>
+      <div class="fg"><label>Sponsor</label><select id="ad-sponsor"></select></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="addDistributor()">Add</button>
+      <button class="btn" onclick="closeModal('m-add-dist')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Send contract -->
+<div class="modal-bg" id="m-send-contract" onclick="if(event.target===this)closeModal('m-send-contract')">
+  <div class="modal">
+    <div class="modal-title">Send contract</div>
+    <div class="fg"><label>Distributor</label><select id="sc-dist"></select></div>
+    <div class="fg"><label>Contract type</label><select id="sc-type"><option>Standard distributor agreement</option><option>Premium distributor agreement</option><option>Exclusive territory agreement</option></select></div>
+    <div class="fg"><label>Notes for distributor</label><textarea id="sc-notes" placeholder="Any specific terms or notes..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="sendContract()">Send contract</button>
+      <button class="btn" onclick="closeModal('m-send-contract')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add course -->
+<div class="modal-bg" id="m-add-course" onclick="if(event.target===this)closeModal('m-add-course')">
+  <div class="modal">
+    <div class="modal-title">New training course</div>
+    <div class="fg"><label>Course title</label><input type="text" id="ac-title" placeholder="e.g. Product Knowledge Basics"></div>
+    <div class="fg"><label>Description</label><textarea id="ac-desc" placeholder="What will distributors learn?"></textarea></div>
+    <div class="form-row">
+      <div class="fg"><label>Duration (hours)</label><input type="number" id="ac-hours" value="2" min="1"></div>
+      <div class="fg"><label>Level</label><select id="ac-level"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="addCourse()">Create course</button>
+      <button class="btn" onclick="closeModal('m-add-course')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Record payment -->
+<div class="modal-bg" id="m-add-payment" onclick="if(event.target===this)closeModal('m-add-payment')">
+  <div class="modal">
+    <div class="modal-title">Record payment</div>
+    <div class="fg"><label>Distributor</label><select id="ap2-dist"></select></div>
+    <div class="form-row">
+      <div class="fg"><label>Amount ($)</label><input type="number" id="ap2-amount" placeholder="500" min="0"></div>
+      <div class="fg"><label>Type</label><select id="ap2-type"><option>Commission</option><option>Bonus</option><option>Level override</option><option>Incentive</option></select></div>
+    </div>
+    <div class="fg"><label>Note</label><input type="text" id="ap2-note" placeholder="e.g. Q1 commission payout"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="addPayment()">Record</button>
+      <button class="btn" onclick="closeModal('m-add-payment')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload document -->
+<div class="modal-bg" id="m-upload-doc" onclick="if(event.target===this)closeModal('m-upload-doc')">
+  <div class="modal">
+    <div class="modal-title">Upload document</div>
+    <div class="fg"><label>Document type</label><select id="ud-type"><option>ID / Passport</option><option>Proof of address</option><option>Bank details</option><option>Tax document</option><option>Other</option></select></div>
+    <div class="fg"><label>File name</label><input type="text" id="ud-name" placeholder="e.g. passport_scan.pdf"></div>
+    <div class="alert alert-info">File upload simulation — in production this would connect to cloud storage.</div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="uploadDoc()">Upload</button>
+      <button class="btn" onclick="closeModal('m-upload-doc')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Send notification -->
+<div class="modal-bg" id="m-notif-send" onclick="if(event.target===this)closeModal('m-notif-send')">
+  <div class="modal">
+    <div class="modal-title">Send notification</div>
+    <div class="fg"><label>Recipient</label><select id="ns-to"><option value="all">All distributors</option></select></div>
+    <div class="fg"><label>Message</label><textarea id="ns-msg" placeholder="Your message to distributors..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="sendNotification()">Send</button>
+      <button class="btn" onclick="closeModal('m-notif-send')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- View application detail -->
+<div class="modal-bg" id="m-app-detail" onclick="if(event.target===this)closeModal('m-app-detail')">
+  <div class="modal">
+    <div class="modal-title">Application detail</div>
+    <div id="app-detail-body"></div>
+    <div class="modal-actions" id="app-detail-actions"></div>
+  </div>
+</div>
+
+<!-- Admin notes -->
+<div class="modal-bg" id="m-dist-detail" onclick="if(event.target===this)closeModal('m-dist-detail')">
+  <div class="modal">
+    <div class="modal-title" id="dd-title">Distributor detail</div>
+    <div id="dd-body"></div>
+    <div class="divider"></div>
+    <div class="card-title" style="margin-bottom:8px">Admin notes</div>
+    <div id="dd-notes"></div>
+    <div class="fg" style="margin-top:8px"><textarea id="dd-new-note" placeholder="Add a note..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="addAdminNote()">Add note</button>
+      <button class="btn" onclick="closeModal('m-dist-detail')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════
+const STEPS_ONBOARD = ['Applied','Approved','Contract signed','Training complete','Active'];
+const OSTATS = ['pending','processing','shipped','delivered'];
+
+let users = [
+  {id:1,fname:'Admin',lname:'User',email:'admin@mapa.com',password:'admin123',role:'admin',phone:'',city:'',bio:''},
+  {id:2,fname:'Maria',lname:'Gonzalez',email:'maria@email.com',password:'dist123',role:'distributor',phone:'+1 555 001',city:'Miami, FL',bio:''},
+  {id:3,fname:'James',lname:'Okafor',email:'james@email.com',password:'dist123',role:'distributor',phone:'+1 555 002',city:'Atlanta, GA',bio:''},
+  {id:4,fname:'Sophie',lname:'Dubois',email:'sophie@email.com',password:'dist123',role:'distributor',phone:'+1 555 003',city:'New York, NY',bio:''},
+];
+
+let distributors = [
+  {id:1,uid:2,name:'Maria Gonzalez',email:'maria@email.com',level:'Level 1',sponsor:'',sales:3200,status:'active',onboardStep:4,notes:[]},
+  {id:2,uid:3,name:'James Okafor',email:'james@email.com',level:'Level 2',sponsor:'Maria Gonzalez',sales:1800,status:'active',onboardStep:4,notes:[]},
+  {id:3,uid:4,name:'Sophie Dubois',email:'sophie@email.com',level:'Level 1',sponsor:'',sales:2500,status:'active',onboardStep:3,notes:[]},
+];
+
+let applications = [
+  {id:1,fname:'Chen',lname:'Wei',email:'chen@email.com',phone:'+1 555 004',city:'Houston, TX',why:'Passionate about health supplements',exp:'3 years MLM',ref:'Maria Gonzalez',target:3000,status:'pending',date:'2025-04-28'},
+  {id:2,fname:'Amira',lname:'Hassan',email:'amira@email.com',phone:'+1 555 005',city:'Chicago, IL',why:'Interested in building my own business',exp:'Sales background',ref:'',target:2000,status:'pending',date:'2025-04-30'},
+  {id:3,fname:'Leo',lname:'Martin',email:'leo@email.com',phone:'+1 555 006',city:'Denver, CO',why:'Looking to grow a network',exp:'None',ref:'James Okafor',target:1500,status:'approved',date:'2025-04-15'},
+];
+
+let contracts = [
+  {id:1,distId:1,type:'Standard distributor agreement',status:'signed',sentDate:'2025-01-10',signedDate:'2025-01-12',notes:''},
+  {id:2,distId:2,type:'Standard distributor agreement',status:'signed',sentDate:'2025-02-01',signedDate:'2025-02-03',notes:''},
+  {id:3,distId:3,type:'Premium distributor agreement',status:'pending',sentDate:'2025-04-20',signedDate:'',notes:'Awaiting signature'},
+];
+
+let courses = [
+  {id:1,title:'Product knowledge basics',desc:'Learn about our full supplement range',hours:2,level:'Beginner',lessons:[
+    {id:1,title:'Introduction to our product line',done:false},
+    {id:2,title:'Omega-3 and essential fatty acids',done:false},
+    {id:3,title:'Vitamins and minerals overview',done:false},
+    {id:4,title:'Probiotics and gut health',done:false},
+  ]},
+  {id:2,title:'Sales techniques',desc:'Master the art of selling supplements',hours:3,level:'Intermediate',lessons:[
+    {id:1,title:'Understanding your customer',done:false},
+    {id:2,title:'Handling objections',done:false},
+    {id:3,title:'Closing the sale',done:false},
+  ]},
+  {id:3,title:'Network building',desc:'Grow and manage your distributor network',hours:4,level:'Advanced',lessons:[
+    {id:1,title:'Recruiting new distributors',done:false},
+    {id:2,title:'Onboarding and training your team',done:false},
+    {id:3,title:'Managing multi-level commissions',done:false},
+    {id:4,title:'Leadership and motivation',done:false},
+  ]},
+];
+
+let enrollments = {2:[0,1],3:[0]};// distId -> courseIds enrolled
+
+let payments = [
+  {id:1,distId:1,type:'Commission',amount:320,status:'paid',date:'2025-04-01',note:'Q1 commission'},
+  {id:2,distId:1,type:'Bonus',amount:150,status:'paid',date:'2025-04-15',note:'Top performer bonus'},
+  {id:3,distId:2,type:'Commission',amount:180,status:'paid',date:'2025-04-01',note:'Q1 commission'},
+  {id:4,distId:3,type:'Commission',amount:250,status:'pending',date:'2025-05-01',note:'April commission'},
+  {id:5,distId:1,type:'Commission',amount:280,status:'pending',date:'2025-05-01',note:'April commission'},
+];
+
+let documents = [
+  {id:1,distId:1,type:'ID / Passport',name:'passport_maria.pdf',date:'2025-01-08'},
+  {id:2,distId:1,type:'Bank details',name:'bank_form_maria.pdf',date:'2025-01-08'},
+  {id:3,distId:2,type:'ID / Passport',name:'passport_james.pdf',date:'2025-02-01'},
+];
+
+let products = [
+  {id:1,name:'Omega-3 Premium',price:49,unit:'box/60 caps',emoji:'🐟'},
+  {id:2,name:'Magnesium Complex',price:39,unit:'box/90 tabs',emoji:'💊'},
+  {id:3,name:'Vitamin D3+K2',price:29,unit:'box/60 caps',emoji:'☀️'},
+  {id:4,name:'Probiotic Blend',price:59,unit:'box/30 caps',emoji:'🦠'},
+  {id:5,name:'Collagen Peptides',price:69,unit:'pouch/500g',emoji:'✨'},
+  {id:6,name:'Zinc + Selenium',price:35,unit:'box/120 tabs',emoji:'🔬'},
+];
+
+let stockOrders = [
+  {id:1,distId:1,items:[{pid:1,qty:10},{pid:3,qty:5}],total:535,status:'delivered',date:'2025-04-10'},
+  {id:2,distId:2,items:[{pid:2,qty:8},{pid:4,qty:3}],total:489,status:'shipped',date:'2025-04-28'},
+];
+
+let notifications = [
+  {id:1,uid:2,msg:'Welcome to Distributor Manager Pro! Complete your training to get started.',time:'2025-04-01',read:false},
+  {id:2,uid:2,msg:'Your commission for Q1 has been processed: $320.',time:'2025-04-01',read:false},
+  {id:3,uid:3,msg:'Welcome to Distributor Manager Pro! Complete your training to get started.',time:'2025-02-01',read:true},
+];
+
+let activityLog = [
+  {icon:'📋',msg:'Chen Wei submitted a new application',time:'30 min ago'},
+  {icon:'✅',msg:'Maria Gonzalez placed a stock order',time:'2 hours ago'},
+  {icon:'💰',msg:'Commission paid to James Okafor: $180',time:'Yesterday'},
+  {icon:'🎓',msg:'Sophie Dubois enrolled in Sales techniques',time:'2 days ago'},
+];
+
+let cart = {};
+let nid = 200;
+let cur = null;
+let viewingDistId = null;
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const fmt = n => '$' + Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+const ini = n => n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+const av = (n,cls='') => `<div class="av ${cls}">${ini(n)}</div>`;
+const today = () => new Date().toISOString().split('T')[0];
+const getRate = l => l==='Level 1'?0.10:l==='Level 2'?0.05:0.02;
+const calcComm = d => Math.round(d.sales * getRate(d.level));
+
+function badge(s){
+  const map = {active:'b-green',approved:'b-green',signed:'b-green',paid:'b-green',delivered:'b-green',
+    pending:'b-amber',processing:'b-blue',shipped:'b-blue',enrolled:'b-blue',
+    rejected:'b-red',cancelled:'b-red',
+    onboarding:'b-gray',inactive:'b-gray','not started':'b-gray',
+    admin:'b-purple',distributor:'b-green'};
+  return `<span class="badge ${map[s]||'b-gray'}">${s}</span>`;
+}
+
+function showErr(id, msg){const e=$(id);if(e){e.textContent=msg;e.style.display='block';}}
+function hideErr(id){const e=$(id);if(e)e.style.display='none';}
+
+// ═══════════════════════════════════════════
+// SCREENS
+// ═══════════════════════════════════════════
+function showScreen(name){
+  $('apply-screen').style.display = name==='apply'?'block':'none';
+  $('auth-screen').style.display = name==='auth'?'flex':'none';
+  $('main-app').style.display = name==='app'?'flex':'none';
+  if(name==='app')$('main-app').classList.add('on');
+  else $('main-app').classList.remove('on');
+}
+
+// ═══════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════
+function switchAuth(t){
+  $('auth-login').style.display = t==='login'?'block':'none';
+  $('auth-register').style.display = t==='register'?'block':'none';
+  $('at-login').classList.toggle('active',t==='login');
+  $('at-reg').classList.toggle('active',t==='register');
+}
+function ql(e,p){$('li-email').value=e;$('li-pass').value=p;doLogin();}
+function doLogin(){
+  const email=$('li-email').value.trim().toLowerCase();
+  const pass=$('li-pass').value;
+  const u=users.find(x=>x.email.toLowerCase()===email&&x.password===pass);
+  if(!u){showErr('login-err','Invalid email or password.');return;}
+  hideErr('login-err');launch(u);
+}
+function doRegister(){
+  const fname=$('rg-fname').value.trim();
+  const lname=$('rg-lname').value.trim();
+  const email=$('rg-email').value.trim().toLowerCase();
+  const pass=$('rg-pass').value;
+  if(!fname||!lname){showErr('reg-err','Please enter your full name.');return;}
+  if(!email.includes('@')){showErr('reg-err','Please enter a valid email.');return;}
+  if(pass.length<6){showErr('reg-err','Password must be at least 6 characters.');return;}
+  if(users.find(x=>x.email.toLowerCase()===email)){showErr('reg-err','Email already registered.');return;}
+  const u={id:nid++,fname,lname,email,password:pass,role:'distributor',phone:'',city:'',bio:''};
+  users.push(u);
+  distributors.push({id:nid++,uid:u.id,name:fname+' '+lname,email,level:'Level 1',sponsor:'',sales:0,status:'onboarding',onboardStep:0,notes:[]});
+  hideErr('reg-err');
+  launch(u);
+}
+function doLogout(){
+  cur=null;cart={};
+  showScreen('auth');
+  $('li-email').value='';$('li-pass').value='';
+}
+function launch(u){
+  cur=u;
+  showScreen('app');
+  $('tb-user').textContent=u.fname+' '+u.lname;
+  const rt=$('role-tag');
+  if(u.role==='admin'){rt.textContent='Admin';rt.className='role-tag tag-admin';$('sb-admin').style.display='block';$('sb-dist').style.display='none';navTo('a-dashboard');}
+  else{rt.textContent='Distributor';rt.className='role-tag tag-dist';$('sb-admin').style.display='none';$('sb-dist').style.display='block';navTo('d-dashboard');}
+  updateNotifBell();
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function navTo(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
+  const sec=$('p-'+page);if(sec)sec.classList.add('active');
+  const sb=cur?.role==='admin'?'sb-admin':'sb-dist';
+  document.querySelectorAll('#'+sb+' .sb-item').forEach(b=>{
+    if(b.getAttribute('onclick')?.includes("'"+page+"'"))b.classList.add('active');
+  });
+  renderPage(page);
+}
+
+function renderPage(page){
+  const renders={
+    'a-dashboard':renderAdminDash,'a-applications':renderApps,'a-distributors':renderAdminDists,
+    'a-contracts':renderAdminContracts,'a-courses':renderAdminCourses,'a-payments':renderAdminPayments,
+    'a-stock':renderAdminStock,'a-users':renderUsers,
+    'd-dashboard':renderDistDash,'d-application':renderDistApp,'d-contract':renderDistContract,
+    'd-courses':renderDistCourses,'d-documents':renderDistDocs,'d-payments':renderDistPayments,
+    'd-stock':renderDistStock,'d-profile':renderProfile,
+    'notifications':renderNotifications,
+  };
+  if(renders[page])renders[page]();
+}
+
+// ═══════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════
+function openModal(id){
+  populateSelects();
+  $(id).classList.add('open');
+}
+function closeModal(id){$(id).classList.remove('open');}
+function populateSelects(){
+  const ad=$('ad-sponsor');
+  if(ad)ad.innerHTML='<option value="">— none —</option>'+distributors.map(d=>`<option>${d.name}</option>`).join('');
+  const sc=$('sc-dist');
+  if(sc)sc.innerHTML=distributors.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+  const ap=$('ap2-dist');
+  if(ap)ap.innerHTML=distributors.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+  const ns=$('ns-to');
+  if(ns)ns.innerHTML='<option value="all">All distributors</option>'+users.filter(u=>u.role==='distributor').map(u=>`<option value="${u.id}">${u.fname} ${u.lname}</option>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// ADMIN RENDERS
+// ═══════════════════════════════════════════
+function renderAdminDash(){
+  const active=distributors.filter(d=>d.status==='active').length;
+  const pApps=applications.filter(a=>a.status==='pending').length;
+  const rev=payments.filter(p=>p.status==='paid').reduce((s,p)=>s+p.amount,0);
+  const commDue=payments.filter(p=>p.status==='pending').reduce((s,p)=>s+p.amount,0);
+  const set=(id,v)=>{const e=$(id);if(e)e.textContent=v;};
+  set('adm-active',active);set('adm-apps',pApps);set('adm-rev',fmt(rev));set('adm-comm',fmt(commDue));
+
+  const sorted=[...distributors].sort((a,b)=>b.sales-a.sales).slice(0,4);
+  const mx=sorted[0]?.sales||1;
+  const tp=$('a-top-performers');
+  if(tp)tp.innerHTML=sorted.map(d=>`
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px">
+        <span>${d.name} <span style="color:#aaa;font-size:11px">${d.level}</span></span>
+        <span style="font-weight:600">${fmt(d.sales)}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(d.sales/mx*100)}%"></div></div>
+    </div>`).join('');
+
+  const ra=$('a-recent-apps');
+  if(ra)ra.innerHTML=applications.slice(-3).reverse().map(a=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0ee;font-size:13px">
+      <span>${a.fname} ${a.lname}</span>${badge(a.status)}
+    </div>`).join('');
+
+  const al=$('a-activity-log');
+  if(al)al.innerHTML=activityLog.map(a=>`
+    <div class="activity-item">
+      <div class="act-icon">${a.icon}</div>
+      <div class="act-content"><div>${a.msg}</div><div class="act-time">${a.time}</div></div>
+    </div>`).join('');
+
+  setTimeout(()=>{renderAdminCharts();renderNetworkTree();},50);
+}
+
+function renderApps(){
+  const tb=$('apps-table');if(!tb)return;
+  tb.innerHTML=applications.map(a=>`
+    <tr>
+      <td><div class="row-flex">${av(a.fname+' '+a.lname)}<span>${a.fname} ${a.lname}</span></div></td>
+      <td style="color:#888">${a.email}</td>
+      <td>${a.city}</td>
+      <td>${badge(a.status)}</td>
+      <td>${a.date}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-sm" onclick="viewApp(${a.id})">View</button>
+        ${a.status==='pending'?`<button class="btn btn-sm btn-success" style="margin-left:4px" onclick="approveApp(${a.id})">Approve</button>`:''}
+      </td>
+    </tr>`).join('');
+}
+
+function viewApp(id){
+  const a=applications.find(x=>x.id===id);if(!a)return;
+  $('app-detail-body').innerHTML=`
+    <div class="form-row" style="margin-bottom:8px">
+      <div><div class="text-muted">Name</div><strong>${a.fname} ${a.lname}</strong></div>
+      <div><div class="text-muted">Email</div><strong>${a.email}</strong></div>
+    </div>
+    <div class="form-row" style="margin-bottom:8px">
+      <div><div class="text-muted">Phone</div>${a.phone}</div>
+      <div><div class="text-muted">City</div>${a.city}</div>
+    </div>
+    <div class="divider"></div>
+    <div style="margin-bottom:8px"><div class="text-muted" style="margin-bottom:4px">Motivation</div><p style="font-size:13px">${a.why}</p></div>
+    <div style="margin-bottom:8px"><div class="text-muted" style="margin-bottom:4px">Experience</div><p style="font-size:13px">${a.exp}</p></div>
+    <div class="form-row">
+      <div><div class="text-muted">Referred by</div>${a.ref||'—'}</div>
+      <div><div class="text-muted">Target monthly sales</div>${fmt(a.target)}</div>
+    </div>
+    <div style="margin-top:8px">${badge(a.status)}</div>`;
+  $('app-detail-actions').innerHTML=`
+    ${a.status==='pending'?`<button class="btn btn-success" onclick="approveApp(${a.id});closeModal('m-app-detail')">Approve</button>
+    <button class="btn btn-danger" onclick="rejectApp(${a.id});closeModal('m-app-detail')">Reject</button>`:''}
+    <button class="btn" onclick="closeModal('m-app-detail')">Close</button>`;
+  openModal('m-app-detail');
+}
+
+function approveApp(id){
+  const a=applications.find(x=>x.id===id);if(!a)return;
+  a.status='approved';
+  const u=users.find(x=>x.email.toLowerCase()===a.email.toLowerCase());
+  if(!u){
+    const newU={id:nid++,fname:a.fname,lname:a.lname,email:a.email,password:'dist123',role:'distributor',phone:a.phone,city:a.city,bio:''};
+    users.push(newU);
+    distributors.push({id:nid++,uid:newU.id,name:a.fname+' '+a.lname,email:a.email,level:'Level 1',sponsor:a.ref||'',sales:0,status:'onboarding',onboardStep:1,notes:[]});
+    notifications.push({id:nid++,uid:newU.id,msg:`Congratulations! Your application has been approved. Welcome to the team, ${a.fname}!`,time:today(),read:false});
+  }
+  activityLog.unshift({icon:'✅',msg:`Application approved: ${a.fname} ${a.lname}`,time:'just now'});
+  renderApps();
+}
+function rejectApp(id){
+  const a=applications.find(x=>x.id===id);if(a)a.status='rejected';
+  renderApps();
+}
+
+function renderAdminDists(){
+  const tb=$('admin-dist-table');if(!tb)return;
+  tb.innerHTML=distributors.map(d=>`
+    <tr>
+      <td><div class="row-flex">${av(d.name)}<span>${d.name}</span></div></td>
+      <td>${d.level}</td>
+      <td>${fmt(d.sales)}</td>
+      <td>${badge(d.status)}</td>
+      <td style="color:#888;font-size:12px">${d.sponsor||'—'}</td>
+      <td><button class="btn btn-sm" onclick="viewDist(${d.id})">View</button></td>
+    </tr>`).join('');
+}
+
+function viewDist(id){
+  viewingDistId=id;
+  const d=distributors.find(x=>x.id===id);if(!d)return;
+  $('dd-title').textContent=d.name;
+  $('dd-body').innerHTML=`
+    <div class="form-row" style="margin-bottom:10px">
+      <div><div class="text-muted">Level</div><strong>${d.level}</strong></div>
+      <div><div class="text-muted">Status</div>${badge(d.status)}</div>
+    </div>
+    <div class="form-row" style="margin-bottom:10px">
+      <div><div class="text-muted">Total sales</div><strong>${fmt(d.sales)}</strong></div>
+      <div><div class="text-muted">Commission</div><strong>${fmt(calcComm(d))}</strong></div>
+    </div>
+    <div><div class="text-muted">Sponsor</div>${d.sponsor||'—'}</div>`;
+  renderAdminNotes(d);
+  openModal('m-dist-detail');
+}
+
+function renderAdminNotes(d){
+  const nn=$('dd-notes');
+  if(!nn)return;
+  nn.innerHTML=d.notes.length?d.notes.map(n=>`
+    <div class="note-item"><div class="note-text">${n.text}</div><div class="note-meta">Admin · ${n.date}</div></div>`).join(''):'<div style="font-size:13px;color:#aaa;margin-bottom:8px">No notes yet.</div>';
+}
+
+function addAdminNote(){
+  const text=$('dd-new-note').value.trim();if(!text)return;
+  const d=distributors.find(x=>x.id===viewingDistId);if(!d)return;
+  d.notes.push({text,date:today()});
+  $('dd-new-note').value='';
+  renderAdminNotes(d);
+}
+
+function addDistributor(){
+  const fname=$('ad-fname').value.trim();const lname=$('ad-lname').value.trim();
+  const email=$('ad-email').value.trim();const level=$('ad-level').value;const sponsor=$('ad-sponsor').value;
+  if(!fname||!lname){alert('Please enter full name');return;}
+  distributors.push({id:nid++,uid:null,name:fname+' '+lname,email,level,sponsor,sales:0,status:'onboarding',onboardStep:1,notes:[]});
+  closeModal('m-add-dist');
+  $('ad-fname').value='';$('ad-lname').value='';$('ad-email').value='';
+  renderAdminDists();
+}
+
+function renderAdminContracts(){
+  const tb=$('admin-contracts-table');if(!tb)return;
+  tb.innerHTML=contracts.map(c=>{
+    const d=distributors.find(x=>x.id===c.distId)||{name:'?'};
+    return`<tr>
+      <td><div class="row-flex">${av(d.name)}<span>${d.name}</span></div></td>
+      <td style="font-size:12px">${c.type}</td>
+      <td>${badge(c.status)}</td>
+      <td>${c.sentDate}</td>
+      <td>${c.signedDate||'—'}</td>
+    </tr>`;}).join('');
+}
+
+function sendContract(){
+  const distId=parseInt($('sc-dist').value);
+  const type=$('sc-type').value;
+  const notes=$('sc-notes').value;
+  contracts.push({id:nid++,distId,type,status:'pending',sentDate:today(),signedDate:'',notes});
+  const d=distributors.find(x=>x.id===distId);
+  if(d){notifications.push({id:nid++,uid:d.uid,msg:`A contract has been sent to you for signature: "${type}". Please review and sign.`,time:today(),read:false});}
+  closeModal('m-send-contract');
+  $('sc-notes').value='';
+  renderAdminContracts();
+}
+
+function renderAdminCourses(){
+  const el=$('admin-courses-list');if(!el)return;
+  el.innerHTML=courses.map(c=>`
+    <div class="course-card">
+      <div class="course-hdr">
+        <div>
+          <div class="course-title">${c.title}</div>
+          <div class="course-meta">${c.level} · ${c.hours}h · ${c.lessons.length} lessons</div>
+        </div>
+        <div>${badge(c.level.toLowerCase())}</div>
+      </div>
+      <div>${c.desc}</div>
+      <div style="margin-top:10px;font-size:12px;color:#888">
+        Enrolled: <strong>${Object.values(enrollments).filter(ids=>ids.includes(c.id-1)).length}</strong> distributors
+      </div>
+    </div>`).join('');
+}
+
+function addCourse(){
+  const title=$('ac-title').value.trim();
+  const desc=$('ac-desc').value.trim();
+  const hours=parseInt($('ac-hours').value)||2;
+  const level=$('ac-level').value;
+  if(!title)return;
+  courses.push({id:nid++,title,desc,hours,level,lessons:[{id:1,title:'Introduction',done:false}]});
+  closeModal('m-add-course');
+  $('ac-title').value='';$('ac-desc').value='';
+  renderAdminCourses();
+}
+
+function renderAdminPayments(){
+  const tb=$('admin-payments-table');if(!tb)return;
+  tb.innerHTML=payments.map(p=>{
+    const d=distributors.find(x=>x.id===p.distId)||{name:'?'};
+    return`<tr>
+      <td><div class="row-flex">${av(d.name)}<span>${d.name}</span></div></td>
+      <td>${p.type}</td>
+      <td style="font-weight:600;color:${p.status==='paid'?'#085041':'#633806'}">${fmt(p.amount)}</td>
+      <td>${badge(p.status)}</td>
+      <td>${p.date}</td>
+      <td>${p.status==='pending'?`<button class="btn btn-sm btn-success" onclick="markPaid(${p.id})">Pay</button>`:'<span style="font-size:11px;color:#aaa">done</span>'}</td>
+    </tr>`;}).join('');
+}
+
+function addPayment(){
+  const distId=parseInt($('ap2-dist').value);
+  const amount=parseFloat($('ap2-amount').value)||0;
+  const type=$('ap2-type').value;
+  const note=$('ap2-note').value;
+  if(!distId||!amount)return;
+  payments.push({id:nid++,distId,type,amount,status:'pending',date:today(),note});
+  const d=distributors.find(x=>x.id===distId);
+  if(d)notifications.push({id:nid++,uid:d.uid,msg:`A new ${type} payment of ${fmt(amount)} has been recorded for you.`,time:today(),read:false});
+  closeModal('m-add-payment');
+  $('ap2-amount').value='';$('ap2-note').value='';
+  renderAdminPayments();
+}
+
+function markPaid(id){
+  const p=payments.find(x=>x.id===id);if(p)p.status='paid';
+  renderAdminPayments();
+}
+
+function renderAdminStock(){
+  const tb=$('admin-stock-table');if(!tb)return;
+  tb.innerHTML=stockOrders.map(o=>{
+    const d=distributors.find(x=>x.id===o.distId)||{name:'?'};
+    const itemsStr=o.items.map(i=>{const p=products.find(x=>x.id===i.pid);return p?`${p.name}×${i.qty}`:''}).join(', ');
+    const idx=OSTATS.indexOf(o.status);const nxt=OSTATS[idx+1];
+    return`<tr>
+      <td><div class="row-flex">${av(d.name)}<span>${d.name}</span></div></td>
+      <td style="font-size:12px">${itemsStr}</td>
+      <td style="font-weight:600">${fmt(o.total)}</td>
+      <td>${badge(o.status)}</td>
+      <td>${o.date}</td>
+      <td>${nxt?`<button class="btn btn-sm" onclick="advanceStock(${o.id})">→ ${nxt}</button>`:'<span style="font-size:11px;color:#aaa">done</span>'}</td>
+    </tr>`;}).join('');
+}
+
+function advanceStock(id){
+  const o=stockOrders.find(x=>x.id===id);if(!o)return;
+  const i=OSTATS.indexOf(o.status);if(i<OSTATS.length-1)o.status=OSTATS[i+1];
+  renderAdminStock();
+}
+
+function renderUsers(){
+  const tb=$('users-table');if(!tb)return;
+  tb.innerHTML=users.map(u=>`
+    <tr>
+      <td><div class="row-flex">${av(u.fname+' '+u.lname)}<span>${u.fname} ${u.lname}</span></div></td>
+      <td style="color:#888">${u.email}</td>
+      <td>${badge(u.role)}</td>
+      <td>${u.id===cur?.id?'<span style="font-size:11px;color:#aaa">you</span>':`<button class="btn btn-sm" onclick="toggleRole(${u.id})">${u.role==='admin'?'Make distributor':'Make admin'}</button>`}</td>
+    </tr>`).join('');
+}
+function toggleRole(uid){const u=users.find(x=>x.id===uid);if(u)u.role=u.role==='admin'?'distributor':'admin';renderUsers();}
+
+// ═══════════════════════════════════════════
+// DISTRIBUTOR RENDERS
+// ═══════════════════════════════════════════
+function myDist(){return distributors.find(x=>x.uid===cur?.id);}
+
+function renderDistDash(){
+  const d=myDist();if(!d)return;
+  const hero=$('d-hero');
+  if(hero)hero.innerHTML=`
+    <div class="hero-av">${ini(d.name)}</div>
+    <div class="hero-info">
+      <div class="hero-name">${d.name}</div>
+      <div class="hero-sub">${d.email}</div>
+      <div class="hero-tags">
+        <div class="hero-tag">${d.level}</div>
+        <div class="hero-tag">${badge(d.status).replace('class="badge ','class="hero-tag badge ')}</div>
+        ${d.sponsor?`<div class="hero-tag">Sponsor: ${d.sponsor}</div>`:''}
+      </div>
+    </div>`;
+
+  const steps=$('onboard-steps');
+  if(steps)steps.innerHTML=STEPS_ONBOARD.map((s,i)=>`
+    <div class="step ${i<d.onboardStep?'done':i===d.onboardStep?'current':''}">
+      <span class="step-num">${i<d.onboardStep?'✓':(i+1)}</span>${s}
+    </div>`).join('');
+
+  const myPays=payments.filter(p=>p.distId===d.id);
+  const myOrds=stockOrders.filter(o=>o.distId===d.id);
+  const myCoursesDone=courses.filter(c=>c.lessons.every(l=>l.done)).length;
+  const set=(id,v)=>{const e=$(id);if(e)e.textContent=v;};
+  set('d-sales',fmt(d.sales));set('d-comm',fmt(calcComm(d)));
+  set('d-orders',myOrds.length);set('d-courses',myCoursesDone+'/'+courses.length);
+
+  const rp=$('d-recent-payments');
+  if(rp)rp.innerHTML=myPays.slice(-3).reverse().map(p=>`
+    <div class="payment-row">
+      <div><div style="font-weight:500">${p.type}</div><div style="font-size:11px;color:#aaa">${p.date} · ${p.note}</div></div>
+      <div class="payment-amt ${p.status==='paid'?'positive':''}">+${fmt(p.amount)} ${badge(p.status)}</div>
+    </div>`).join('')||'<div class="empty">No payments yet</div>';
+
+  const cp=$('d-course-preview');
+  if(cp)cp.innerHTML=courses.slice(0,3).map(c=>{
+    const done=c.lessons.filter(l=>l.done).length;
+    const pct=Math.round(done/c.lessons.length*100);
+    return`<div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px">
+        <span>${c.title}</span><span style="color:#888">${pct}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>`;}).join('');
+
+  setTimeout(()=>renderDistCharts(d),50);
+}
+
+function renderDistApp(){
+  const el=$('d-application-view');if(!el)return;
+  const u=cur;
+  const a=applications.find(x=>x.email.toLowerCase()===u.email.toLowerCase());
+  if(!a){
+    el.innerHTML=`<div class="alert alert-info">Your application was created when your admin added you. No public application on file.</div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:1rem">Your account details</div>
+      <div class="form-row">
+        <div><div class="text-muted">Name</div><strong>${u.fname} ${u.lname}</strong></div>
+        <div><div class="text-muted">Email</div><strong>${u.email}</strong></div>
+      </div>
+    </div>`;
+    return;
+  }
+  el.innerHTML=`
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Application status</div>${badge(a.status)}</div>
+      <div class="form-row" style="margin-bottom:10px">
+        <div><div class="text-muted">Name</div><strong>${a.fname} ${a.lname}</strong></div>
+        <div><div class="text-muted">Applied</div>${a.date}</div>
+      </div>
+      <div class="form-row" style="margin-bottom:10px">
+        <div><div class="text-muted">City</div>${a.city}</div>
+        <div><div class="text-muted">Target sales</div>${fmt(a.target)}/month</div>
+      </div>
+      <div class="divider"></div>
+      <div style="margin-bottom:8px"><div class="text-muted" style="margin-bottom:4px">Motivation</div><p style="font-size:13px">${a.why}</p></div>
+      <div><div class="text-muted" style="margin-bottom:4px">Experience</div><p style="font-size:13px">${a.exp}</p></div>
+    </div>`;
+}
+
+function renderDistContract(){
+  const el=$('d-contract-view');if(!el)return;
+  const d=myDist();if(!d)return;
+  const c=contracts.find(x=>x.distId===d.id);
+  if(!c){
+    el.innerHTML='<div class="alert alert-warning">No contract has been sent to you yet. Your admin will send one shortly.</div>';
+    return;
+  }
+  el.innerHTML=`
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">${c.type}</div>${badge(c.status)}</div>
+      <div class="contract-box">
+        <p><strong>DISTRIBUTOR AGREEMENT</strong></p><br>
+        <p>This agreement is made between <strong>Distributor Manager Pro</strong> (the "Company") and <strong>${d.name}</strong> (the "Distributor").</p><br>
+        <p><strong>1. Appointment.</strong> The Company appoints the Distributor as an independent distributor of its medical supplement products.</p><br>
+        <p><strong>2. Commission structure.</strong> The Distributor will earn commissions based on their level:<br>
+        Level 1: 10% on direct sales · Level 2: 5% on downline · Level 3: 2% on downline</p><br>
+        <p><strong>3. Training.</strong> The Distributor agrees to complete all mandatory training courses before actively selling.</p><br>
+        <p><strong>4. Compliance.</strong> The Distributor agrees to comply with all applicable laws and regulations regarding supplement sales.</p><br>
+        <p><strong>5. Term.</strong> This agreement is valid for 12 months from the date of signing and auto-renews annually.</p>
+        ${c.notes?`<br><p><strong>Additional notes:</strong> ${c.notes}</p>`:''}
+      </div>
+      ${c.status==='pending'?`
+        <div>
+          <label style="font-size:12px;color:#555;font-weight:500;display:block;margin-bottom:6px">Your signature</label>
+          <div class="sig-area" id="sig-box" onclick="signContract(${c.id})">Click here to sign digitally</div>
+        </div>
+        <div style="margin-top:1rem"><button class="btn btn-success" onclick="signContract(${c.id})">Sign contract</button></div>`
+      :`<div class="alert alert-success">Contract signed on ${c.signedDate}.</div>`}
+    </div>`;
+}
+
+function signContract(id){
+  const c=contracts.find(x=>x.id===id);if(!c)return;
+  c.status='signed';c.signedDate=today();
+  const d=myDist();if(d&&d.onboardStep<3)d.onboardStep=3;
+  activityLog.unshift({icon:'📝',msg:`${d?.name||'Distributor'} signed their contract`,time:'just now'});
+  renderDistContract();
+}
+
+function renderDistCourses(){
+  const el=$('d-courses-list');if(!el)return;
+  el.innerHTML=courses.map((c,ci)=>{
+    const done=c.lessons.filter(l=>l.done).length;
+    const pct=Math.round(done/c.lessons.length*100);
+    return`<div class="course-card">
+      <div class="course-hdr">
+        <div>
+          <div class="course-title">${c.title}</div>
+          <div class="course-meta">${c.level} · ${c.hours}h · ${c.lessons.length} lessons</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;font-weight:600;color:${pct===100?'#085041':'#1a1a1a'}">${pct}%</div>
+          ${badge(pct===100?'active':pct>0?'enrolled':'not started')}
+        </div>
+      </div>
+      <div class="progress-bar" style="margin-bottom:12px"><div class="progress-fill" style="width:${pct}%"></div></div>
+      ${c.lessons.map((l,li)=>`
+        <div class="lesson-row">
+          <div class="lesson-check ${l.done?'done':''}" onclick="toggleLesson(${ci},${li})">${l.done?'✓':''}</div>
+          <span style="${l.done?'text-decoration:line-through;color:#aaa':''}">${l.title}</span>
+        </div>`).join('')}
+    </div>`;}).join('');
+}
+
+function toggleLesson(ci,li){
+  courses[ci].lessons[li].done=!courses[ci].lessons[li].done;
+  const d=myDist();
+  if(d&&courses.every(c=>c.lessons.every(l=>l.done))&&d.onboardStep<4){
+    d.onboardStep=4;
+    activityLog.unshift({icon:'🎓',msg:`${d.name} completed all training courses`,time:'just now'});
+  }
+  renderDistCourses();
+}
+
+function renderDistDocs(){
+  const el=$('d-docs-list');if(!el)return;
+  const d=myDist();if(!d)return;
+  const myDocs=documents.filter(x=>x.distId===d.id);
+  el.innerHTML=myDocs.length?myDocs.map(doc=>`
+    <div class="doc-row">
+      <div class="doc-icon">📄</div>
+      <div class="doc-info">
+        <div class="doc-name">${doc.name}</div>
+        <div class="doc-meta">${doc.type} · Uploaded ${doc.date}</div>
+      </div>
+      ${badge('active').replace('>active<','>uploaded<')}
+    </div>`)
+  .join(''):'<div class="empty">No documents uploaded yet.</div>';
+}
+
+function uploadDoc(){
+  const type=$('ud-type').value;const name=$('ud-name').value.trim();
+  if(!name)return;
+  const d=myDist();if(!d)return;
+  documents.push({id:nid++,distId:d.id,type,name,date:today()});
+  closeModal('m-upload-doc');
+  $('ud-name').value='';
+  renderDistDocs();
+}
+
+function renderDistPayments(){
+  const d=myDist();if(!d)return;
+  const myPays=payments.filter(p=>p.distId===d.id);
+  const total=myPays.filter(p=>p.status==='paid').reduce((s,p)=>s+p.amount,0);
+  const pend=myPays.filter(p=>p.status==='pending').reduce((s,p)=>s+p.amount,0);
+  const month=myPays.filter(p=>p.status==='paid'&&p.date.startsWith('2025-05')).reduce((s,p)=>s+p.amount,0);
+  const set=(id,v)=>{const e=$(id);if(e)e.textContent=v;};
+  set('dp-total',fmt(total));set('dp-pending',fmt(pend));set('dp-month',fmt(month));
+  const el=$('d-payments-list');if(!el)return;
+  el.innerHTML=myPays.length?myPays.reverse().map(p=>`
+    <div class="payment-row">
+      <div>
+        <div style="font-weight:500">${p.type}</div>
+        <div style="font-size:11px;color:#aaa">${p.date} · ${p.note}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="payment-amt ${p.status==='paid'?'positive':''}">+${fmt(p.amount)}</span>
+        ${badge(p.status)}
+      </div>
+    </div>`)
+  .join(''):'<div class="empty">No payments yet.</div>';
+}
+
+function renderDistStock(){
+  const el=$('product-catalog');if(!el)return;
+  el.innerHTML=`<div class="card-title" style="margin-bottom:1rem">Product catalog</div>`+
+  products.map(p=>`
+    <div class="stock-item">
+      <div class="stock-img">${p.emoji}</div>
+      <div class="stock-info">
+        <div class="stock-name">${p.name}</div>
+        <div class="stock-price">${fmt(p.price)} / ${p.unit}</div>
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="updateCart(${p.id},-1)">−</button>
+        <div class="qty-val">${cart[p.id]||0}</div>
+        <button class="qty-btn" onclick="updateCart(${p.id},1)">+</button>
+      </div>
+    </div>`).join('');
+  renderCart();
+  renderMyStockOrders();
+}
+
+function updateCart(pid,delta){
+  cart[pid]=(cart[pid]||0)+delta;
+  if(cart[pid]<0)cart[pid]=0;
+  renderDistStock();
+}
+
+function renderCart(){
+  const el=$('cart-items');const tot=$('cart-total');if(!el)return;
+  const items=Object.entries(cart).filter(([,q])=>q>0);
+  if(!items.length){el.innerHTML='<div class="empty" style="padding:1rem">Cart is empty</div>';if(tot)tot.textContent='$0';return;}
+  let total=0;
+  el.innerHTML=items.map(([pid,qty])=>{
+    const p=products.find(x=>x.id===parseInt(pid));if(!p)return'';
+    total+=p.price*qty;
+    return`<div class="payment-row"><span>${p.emoji} ${p.name} ×${qty}</span><span>${fmt(p.price*qty)}</span></div>`;}).join('');
+  if(tot)tot.textContent=fmt(total);
+}
+
+function submitStockOrder(){
+  const items=Object.entries(cart).filter(([,q])=>q>0).map(([pid,qty])=>({pid:parseInt(pid),qty}));
+  if(!items.length){alert('Cart is empty');return;}
+  const d=myDist();if(!d)return;
+  const total=items.reduce((s,i)=>{const p=products.find(x=>x.id===i.pid);return s+(p?p.price*i.qty:0);},0);
+  stockOrders.push({id:nid++,distId:d.id,items,total,status:'pending',date:today()});
+  d.sales=Math.round(d.sales+total);
+  activityLog.unshift({icon:'📦',msg:`${d.name} placed a stock order for ${fmt(total)}`,time:'just now'});
+  cart={};
+  alert('Order submitted!');
+  renderDistStock();
+}
+
+function renderMyStockOrders(){
+  const d=myDist();if(!d)return;
+  const myO=stockOrders.filter(x=>x.distId===d.id);
+  const el=$('my-stock-orders');if(!el)return;
+  el.innerHTML=myO.length?myO.slice(-3).reverse().map(o=>`
+    <div class="payment-row" style="font-size:12px">
+      <div><div>${o.date}</div><div style="color:#aaa">${o.items.length} product(s)</div></div>
+      <div style="display:flex;align-items:center;gap:6px"><strong>${fmt(o.total)}</strong>${badge(o.status)}</div>
+    </div>`).join(''):'<div style="font-size:12px;color:#aaa">No orders yet.</div>';
+}
+
+function renderProfile(){
+  const u=cur;if(!u)return;
+  const set=(id,v)=>{const e=$(id);if(e)e.value=v||'';};
+  set('pf-fname',u.fname);set('pf-lname',u.lname);set('pf-email',u.email);
+  set('pf-phone',u.phone);set('pf-city',u.city);set('pf-bio',u.bio);
+}
+function saveProfile(){
+  if(!cur)return;
+  cur.fname=$('pf-fname').value.trim()||cur.fname;
+  cur.lname=$('pf-lname').value.trim()||cur.lname;
+  cur.phone=$('pf-phone').value.trim();
+  cur.city=$('pf-city').value.trim();
+  cur.bio=$('pf-bio').value.trim();
+  const d=myDist();if(d)d.name=cur.fname+' '+cur.lname;
+  $('tb-user').textContent=cur.fname+' '+cur.lname;
+  alert('Profile saved!');
+}
+function changePassword(){
+  const np=$('pf-newpass').value;const cp=$('pf-confpass').value;
+  if(np.length<6){alert('Password must be at least 6 characters.');return;}
+  if(np!==cp){alert('Passwords do not match.');return;}
+  if(cur)cur.password=np;
+  $('pf-newpass').value='';$('pf-confpass').value='';
+  alert('Password updated!');
+}
+
+// ═══════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════
+function updateNotifBell(){
+  const unread=notifications.filter(n=>n.uid===cur?.id&&!n.read).length;
+  const bell=$('notif-bell');
+  if(bell)bell.classList.toggle('has-notif',unread>0);
+}
+function renderNotifications(){
+  const el=$('notif-list');if(!el)return;
+  const mine=notifications.filter(n=>cur?.role==='admin'||(n.uid===cur?.id));
+  el.innerHTML=mine.length?mine.slice().reverse().map(n=>`
+    <div class="notif-item" onclick="markRead(${n.id})">
+      <div class="notif-dot-indicator ${n.read?'read':''}"></div>
+      <div class="notif-content">
+        <div class="notif-msg">${n.msg}</div>
+        <div class="notif-time">${n.time}</div>
+      </div>
+    </div>`)
+  .join(''):'<div class="empty">No notifications.</div>';
+}
+function markRead(id){
+  const n=notifications.find(x=>x.id===id);if(n)n.read=true;
+  updateNotifBell();renderNotifications();
+}
+function markAllRead(){
+  notifications.filter(n=>n.uid===cur?.id).forEach(n=>n.read=true);
+  updateNotifBell();renderNotifications();
+}
+function sendNotification(){
+  const to=$('ns-to').value;const msg=$('ns-msg').value.trim();
+  if(!msg)return;
+  if(to==='all'){
+    users.filter(u=>u.role==='distributor').forEach(u=>{
+      notifications.push({id:nid++,uid:u.id,msg,time:today(),read:false});
+    });
+  } else {
+    notifications.push({id:nid++,uid:parseInt(to),msg,time:today(),read:false});
+  }
+  closeModal('m-notif-send');
+  $('ns-msg').value='';
+  alert('Notification sent!');
+}
+
+// ═══════════════════════════════════════════
+// PUBLIC APPLICATION
+// ═══════════════════════════════════════════
+function submitApplication(){
+  const fname=$('ap-fname').value.trim();const lname=$('ap-lname').value.trim();
+  const email=$('ap-email').value.trim();const phone=$('ap-phone').value.trim();
+  const city=$('ap-city').value.trim();const why=$('ap-why').value.trim();
+  const exp=$('ap-exp').value.trim();const ref=$('ap-ref').value.trim();
+  const target=parseInt($('ap-target').value)||0;
+  if(!fname||!lname||!email){alert('Please fill in required fields.');return;}
+  applications.push({id:nid++,fname,lname,email,phone,city,why,exp,ref,target,status:'pending',date:today()});
+  // Create user account automatically
+  if(!users.find(u=>u.email.toLowerCase()===email.toLowerCase())){
+    const u={id:nid++,fname,lname,email,password:'dist123',role:'distributor',phone,city,bio:''};
+    users.push(u);
+    distributors.push({id:nid++,uid:u.id,name:fname+' '+lname,email,level:'Level 1',sponsor:ref||'',sales:0,status:'onboarding',onboardStep:0,notes:[]});
+  }
+  activityLog.unshift({icon:'📋',msg:`New application from ${fname} ${lname}`,time:'just now'});
+  $('apply-form-wrap').style.display='none';
+  $('apply-success').style.display='block';
+}
+
+// ═══════════════════════════════════════════
+// CHARTS & VISUALS
+// ═══════════════════════════════════════════
+let chartSales=null, chartDonut=null, chartMySales=null, chartMyComm=null;
+
+function destroyChart(c){if(c){try{c.destroy();}catch(e){}}return null;}
+
+function renderAdminCharts(){
+  // Greeting
+  const h=new Date().getHours();
+  const g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  const el=$('adm-greeting');if(el)el.textContent=g+' 👋';
+
+  // Sales trend bar chart
+  const sc=$('chart-sales');if(!sc)return;
+  chartSales=destroyChart(chartSales);
+  const months=['Nov','Dec','Jan','Feb','Mar','Apr'];
+  const salesData=[8200,9500,7800,11200,10400,12800];
+  chartSales=new Chart(sc,{
+    type:'bar',
+    data:{labels:months,datasets:[{
+      label:'Revenue ($)',
+      data:salesData,
+      backgroundColor:'rgba(29,158,117,0.15)',
+      borderColor:'#1D9E75',
+      borderWidth:2,
+      borderRadius:6,
+    }]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{
+      y:{grid:{color:'#f0f0ee'},ticks:{callback:v=>'$'+v.toLocaleString(),font:{size:10}}},
+      x:{grid:{display:false},ticks:{font:{size:11}}}
+    }}
+  });
+
+  // Commission donut
+  const dc=$('chart-donut');if(!dc)return;
+  chartDonut=destroyChart(chartDonut);
+  const distNames=distributors.slice(0,4).map(d=>d.name.split(' ')[0]);
+  const distComms=distributors.slice(0,4).map(d=>calcComm(d));
+  const colors=['#1D9E75','#378ADD','#7F77DD','#EF9F27'];
+  chartDonut=new Chart(dc,{
+    type:'doughnut',
+    data:{labels:distNames,datasets:[{data:distComms,backgroundColor:colors,borderWidth:0,hoverOffset:4}]},
+    options:{responsive:false,plugins:{legend:{display:false}},cutout:'65%'}
+  });
+  const leg=$('donut-legend');
+  if(leg)leg.innerHTML=distNames.map((n,i)=>`
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+      <div style="width:10px;height:10px;border-radius:50%;background:${colors[i]};flex-shrink:0"></div>
+      <span style="color:#555">${n}</span>
+      <span style="margin-left:auto;font-weight:600">$${distComms[i]}</span>
+    </div>`).join('');
+}
+
+function renderNetworkTree(){
+  const el=$('network-tree');if(!el)return;
+  // Build tree from sponsor relationships
+  const roots=distributors.filter(d=>!d.sponsor);
+  function nodeHTML(d,level){
+    const children=distributors.filter(x=>x.sponsor===d.name);
+    const color=level===0?'#1a1a1a':level===1?'#1D9E75':'#378ADD';
+    return`<div style="display:inline-flex;flex-direction:column;align-items:center;margin:0 8px">
+      <div style="background:${color};color:#fff;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:500;white-space:nowrap;min-width:90px;text-align:center">
+        <div>${d.name.split(' ')[0]}</div>
+        <div style="font-size:10px;opacity:0.8">${d.level}</div>
+        <div style="font-size:11px;font-weight:700;margin-top:2px">$${d.sales.toLocaleString()}</div>
+      </div>
+      ${children.length?`
+        <div style="width:2px;height:16px;background:#e5e5e2"></div>
+        <div style="display:flex;align-items:flex-start;border-top:2px solid #e5e5e2;padding-top:0">
+          ${children.map(c=>nodeHTML(c,level+1)).join('<div style="width:16px"></div>')}
+        </div>`:''
+      }
+    </div>`;
+  }
+  el.innerHTML=`<div style="display:flex;justify-content:center;padding:1rem 0;gap:2rem">
+    ${roots.map(r=>nodeHTML(r,0)).join('<div style="width:32px"></div>')}
+  </div>`;
+}
+
+function renderDistCharts(d){
+  // My sales bar chart
+  const ms=$('chart-my-sales');if(!ms)return;
+  chartMySales=destroyChart(chartMySales);
+  const myOrderData=[0,0,0,0,0,0];
+  stockOrders.filter(o=>o.distId===d.id).forEach((o,i)=>{myOrderData[Math.min(i,5)]+=o.total;});
+  const base=d.sales>0?Math.round(d.sales/6):0;
+  const filled=myOrderData.map((v,i)=>v>0?v:Math.max(0,base+Math.round((Math.random()-0.4)*base*0.5)));
+  chartMySales=new Chart(ms,{
+    type:'line',
+    data:{labels:['Nov','Dec','Jan','Feb','Mar','Apr'],datasets:[{
+      label:'Sales ($)',data:filled,
+      borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',
+      borderWidth:2,pointBackgroundColor:'#1D9E75',pointRadius:4,fill:true,tension:0.4
+    }]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{
+      y:{grid:{color:'#f0f0ee'},ticks:{callback:v=>'$'+v.toLocaleString(),font:{size:10}}},
+      x:{grid:{display:false},ticks:{font:{size:11}}}
+    }}
+  });
+
+  // Commission breakdown bar
+  const mc=$('chart-my-comm');if(!mc)return;
+  chartMyComm=destroyChart(chartMyComm);
+  const r=getRate(d.level);
+  chartMyComm=new Chart(mc,{
+    type:'bar',
+    data:{
+      labels:['Level 1 (10%)','Level 2 (5%)','Level 3 (2%)'],
+      datasets:[{
+        label:'Rate',
+        data:[10,5,2],
+        backgroundColor:['rgba(29,158,117,0.8)','rgba(55,138,221,0.5)','rgba(127,119,221,0.4)'],
+        borderRadius:6,borderWidth:0,
+      }]
+    },
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{
+      y:{grid:{color:'#f0f0ee'},max:15,ticks:{callback:v=>v+'%',font:{size:10}}},
+      x:{grid:{display:false},ticks:{font:{size:10}}}
+    }}
+  });
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+showScreen('auth');
+</script>
+</body>
+</html>
